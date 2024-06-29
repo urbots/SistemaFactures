@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\PersonaEmpresaRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: PersonaEmpresaRepository::class)]
 #[ORM\InheritanceType('SINGLE_TABLE')]
@@ -40,6 +42,12 @@ class PersonaEmpresa
     #[ORM\OneToMany(targetEntity: Factura::class, mappedBy: 'receptor')]
     #[ORM\JoinColumn(nullable: false)]
     private Collection $facturesRebudes;
+
+    public function __construct()
+    {
+        $this->facturesEmeses = new ArrayCollection();
+        $this->facturesRebudes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -104,5 +112,20 @@ class PersonaEmpresa
         $this->Provincia = $Provincia;
 
         return $this;
+    }
+
+    public function setNomComplet(mixed $getData)
+    {
+        $this->NomComplet = $getData;
+    }
+
+    public function getNomComplet()
+    {
+        return $this->NomComplet;
+    }
+
+    public function __toString()
+    {
+        return $this->NomComplet;
     }
 }
