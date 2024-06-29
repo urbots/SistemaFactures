@@ -81,4 +81,9 @@ class CompteBancari
 
         return $this;
     }
+
+    public function __toString(): string
+    {
+        return "IBAN: " . $this->IBAN . "<br>SWIFT: " . $this->SWIFT . "<br>Entitat: " . $this->Entitat . "";
+    }
 }

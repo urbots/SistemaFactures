@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Elements;
+use App\Entity\Impost;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -131,7 +133,10 @@ class ElementsController extends AbstractController
             ->add('Concepte', TextareaType::class)
             ->add('preuUnitari', IntegerType::class)
             ->add('preuSenseImpostos', IntegerType::class)
-            ->add('Impost', IntegerType::class)
+            ->add('Impost', EntityType::class, [
+                'class' => Impost::class,
+                'choice_label' => 'nom'
+            ])
             ->add('save', SubmitType::class, ['label' => 'Create Element'])
             ->getForm();
     }

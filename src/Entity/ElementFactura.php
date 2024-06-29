@@ -19,8 +19,9 @@ class ElementFactura
     #[ORM\Column]
     private ?float $preuSenseImpostos = null;
 
-    #[ORM\Column]
-    private ?int $Impost = null;
+    #[ORM\ManyToOne(targetEntity: Impost::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private Impost|null $Impost = null;
 
     #[ORM\Column]
     private ?int $Unitats = null;
@@ -32,6 +33,16 @@ class ElementFactura
     #[ORM\ManyToOne(targetEntity: Elements::class, inversedBy: 'elementsFactura')]
     #[ORM\JoinColumn(nullable: false)]
     private Elements $elements;
+
+    public function getFactura(): Factura
+    {
+        return $this->factura;
+    }
+
+    public function getElements(): Elements
+    {
+        return $this->elements;
+    }
 
 
     public function getId(): ?int
@@ -63,12 +74,12 @@ class ElementFactura
         return $this;
     }
 
-    public function getImpost(): ?int
+    public function getImpost(): Impost
     {
         return $this->Impost;
     }
 
-    public function setImpost(int $Impost): static
+    public function setImpost(Impost $Impost): static
     {
         $this->Impost = $Impost;
 
@@ -109,5 +120,17 @@ class ElementFactura
         $this->preuUnitari = $preuUnitari;
 
         return $this;
+    }
+
+    public function setElements(Elements $elements): static
+    {
+        $this->elements = $elements;
+
+        return $this;
+    }
+
+    public function setFactura(Factura $factura)
+    {
+        $this->factura = $factura;
     }
 }

@@ -21,12 +21,11 @@
                 {% for factura in factures %}
                     <tr>
                         <td>{{ factura.numero }}</td>
-                        <td>{{ factura.fecha|date('d/m/Y') }}</td>
-                        <td>{{ factura.cliente.nombre }}</td>
-                        <td>{{ factura.importe }}</td>
+                        <td>{{ factura.dataEmissio|date('d/m/Y') }}</td>
+                        <td>{{ factura.receptor.nomComplet }}</td>
+                        <td>{{ factura.total }}</td>
                         <td>
-                            <a href="{{ path('factura_show', {'id': factura.id}) }}">Ver</a>
-                            <a href="{{ path('factura_edit', {'id': factura.id}) }}">Editar</a>
+                            <a href="{{ path('app_factura_show', {'id': factura.id}) }}">Ver</a>
                         </td>
                     </tr>
                 {% endfor %}
