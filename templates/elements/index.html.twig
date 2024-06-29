@@ -8,13 +8,33 @@
     .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
 </style>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+<div class="container">
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/david/Documents/SistemaFactures/src/Controller/ElementsController.php</code></li>
-        <li>Your template at <code>C:/Users/david/Documents/SistemaFactures/templates/elements/index.html.twig</code></li>
-    </ul>
+    <a href="{{ path('elements_new') }}" class="btn btn-primary">Crear</a>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Concepte</th>
+            <th>Preu sense impostos</th>
+            <th>Impost</th>
+            <th>Preu unitari</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for element in elements %}
+            <tr>
+                <td>{{ element.Concepte }}</td>
+                <td>{{ element.preuSenseImpostos }}</td>
+                <td>{{ element.Impost }}</td>
+                <td>{{ element.preuUnitari }}</td>
+                <td>
+                    <a href="{{ path('elements_show', {'id': element.id}) }}" class="btn btn-primary">Mostrar</a>
+                    <a href="{{ path('elements_edit', {'id': element.id}) }}" class="btn btn-primary">Editar</a>
+                    <a href="{{ path('elements_delete', {'id': element.id}) }}" class="btn btn-primary">Eliminar</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}
