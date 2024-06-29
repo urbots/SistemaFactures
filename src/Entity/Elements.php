@@ -17,10 +17,10 @@ class Elements
     private ?string $Concepte = null;
 
     #[ORM\Column]
-    private ?int $preuUnitari = null;
+    private ?float $preuUnitari = null;
 
     #[ORM\Column]
-    private ?int $preuSenseImpostos = null;
+    private ?float $preuSenseImpostos = null;
 
     #[ORM\ManyToOne(targetEntity: Impost::class)]
     #[ORM\JoinColumn(nullable: false)]

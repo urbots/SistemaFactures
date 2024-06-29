@@ -8,6 +8,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -131,8 +132,8 @@ class ElementsController extends AbstractController
     {
         return $this->createFormBuilder()
             ->add('Concepte', TextareaType::class)
-            ->add('preuUnitari', IntegerType::class)
-            ->add('preuSenseImpostos', IntegerType::class)
+            ->add('preuUnitari', NumberType::class, ['scale' => 2])
+            ->add('preuSenseImpostos', NumberType::class, ['scale' => 2])
             ->add('Impost', EntityType::class, [
                 'class' => Impost::class,
                 'choice_label' => 'nom'

@@ -18,6 +18,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Factura;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 
 class FacturaController extends AbstractController
@@ -154,30 +157,29 @@ class FacturaController extends AbstractController
     public function xml($id): Response
     {
         $factura = $this->getDoctrine()->getRepository(Factura::class)->find($id);
-        $xml = new \DOMDocument('1.0', 'UTF-8');
-        $xml->formatOutput = true;
-        $root = $xml->createElement('factura');
-        $xml->appendChild($root);
-        $root->appendChild($xml->createElement('id', $factura->getId()));
-        $root->appendChild($xml->createElement('dataEmissio', $factura->getDataEmissio()->format('Y-m-d')));
-        $root->appendChild($xml->createElement('total', $factura->getTotal()));
-        $root->appendChild($xml->createElement('compteBancari', $factura->getCompteBancari()->getReferencia()));
-        $root->appendChild($xml->createElement('emisor', $factura->getEmisor()->getNomComplet()));
-        $root->appendChild($xml->createElement('receptor', $factura->getReceptor()->getNomComplet()));
-        $elements = $xml->createElement('elements');
-        $root->appendChild($elements);
-        foreach ($factura->getElementsFactura() as $element) {
-            $el = $xml->createElement('element');
-            $elements->appendChild($el);
-            $el->appendChild($xml->createElement('id', $element->getId()));
-            $el->appendChild($xml->createElement('unitats', $element->getUnitats()));
-            $el->appendChild($xml->createElement('preuSenseImpostos', $element->getPreuSenseImpostos()));
-            $el->appendChild($xml->createElement('preuAmbImpostos', $element->getPreuAmbImpostos()));
-            $el->appendChild($xml->createElement('elements', $element->getElements()->getNom()));
-            $el->appendChild($xml->createElement('impost', $element->getImpost()->getNom()));
-        }
-        $xml->save('factura.xml');
-        return new Response();
+        $data = $factura->getXML();
+        $encoders = [new XmlEncoder()];
+        $normalizers = [new ObjectNormalizer()];
+
+        $serializer = new Serializer($normalizers, $encoders);
+
+        $xmlContent = $serializer->serialize($data, 'xml', [
+            XmlEncoder::ROOT_NODE_NAME => 'Facturae',
+            XmlEncoder::ENCODING => 'UTF-8',
+            XmlEncoder::STANDALONE => true,
+            'xml_format_output' => true,
+        ]);
+
+        // Añadir los atributos manualmente al nodo raíz
+        $xmlContent = str_replace('<Facturae>', '<fe:Facturae xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:fe="http://www.facturae.gob.es/formato/Versiones/Facturaev3_2_2.xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">', $xmlContent);
+        $xmlContent = str_replace('</Facturae>', '</fe:Facturae>', $xmlContent);
+
+        $response = new Response($xmlContent);
+        $response->headers->set('Content-Type', 'application/xml');
+        $response->headers->set('Content-Disposition', 'attachment; filename="factura.xml"');
+
+        return $response;
+
     }
 
     /**
