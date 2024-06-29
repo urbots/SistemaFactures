@@ -17,6 +17,8 @@ class PersonaEmpresa
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    private ?string $NomComplet = null;
+    #[ORM\Column(length: 255)]
     private ?string $NIF = null;
 
     #[ORM\Column(length: 255)]

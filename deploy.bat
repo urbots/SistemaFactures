@@ -1,3 +1,5 @@
+symfony server:start
+
 @echo off
 cd C:\xampp
 start xampp-control.exe
@@ -11,6 +13,3 @@ call mysql\bin\mysqld.exe
 
 timeout /t 5 /nobreak >nul
 
-rem Iniciar servidor Symfony
-cd C:\ruta\de\tu\proyecto
-symfony server:start
