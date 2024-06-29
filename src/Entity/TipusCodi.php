@@ -16,6 +16,9 @@ class TipusCodi
     #[ORM\Column(length: 255)]
     private ?string $Referencia = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $Name = null;
+
     #[ORM\OneToMany(targetEntity: Codis::class, mappedBy: 'tipusCodi')]
     #[ORM\JoinColumn(nullable: false)]
     private $codis;

@@ -90,7 +90,7 @@
         {% for producte in productes %}
             let p_{{ producte.id }} = new producte();
         p_{{ producte.id }}.id = {{ producte.id }};
-        p_{{ producte.id }}.concepte = '{{ producte.Concepte }}';
+        p_{{ producte.id }}.concepte = "{{ producte.Concepte|escape('js') }}";
         p_{{ producte.id }}.preuSenseImpostos = {{ producte.preuSenseImpostos }};
         p_{{ producte.id }}.impostos = {{ producte.Impost.id }};
         p_{{ producte.id }}.preuAmbImpostos = {{ producte.preuUnitari }};

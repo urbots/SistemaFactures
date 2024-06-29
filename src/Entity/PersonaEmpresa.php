@@ -128,4 +128,37 @@ class PersonaEmpresa
     {
         return $this->NomComplet;
     }
+
+    public function getXMLAddress(){
+        return [
+
+                'Address' => $this->getCarrer(),
+                'PostCode' => $this->getCP(),
+                'Town' => $this->getCiutat(),
+                'Province' => $this->getProvincia(),
+                'CountryCode' => 'ESP',
+
+        ];
+    }
+
+    public function getXML()
+    {
+        return [
+            'TaxIdentification' => [
+                'PersonTypeCode' => $this->isPersonaJuridica() ? 'J' : 'F',
+                'ResidenceTypeCode' => 'R',
+                'TaxIdentificationNumber' => $this->getNIF(),
+            ],
+            'LegalEntity' => [
+                'CorporateName' => $this->getNomComplet(),
+                'AddressInSpain' => $this->getXMLAddress()
+            ]
+        ];
+    }
+
+    protected function isPersonaJuridica()
+    {
+        //si empieza por letra es juridica
+        return ctype_alpha($this->getNIF()[0]);
+    }
 }

@@ -133,4 +133,24 @@ class ElementFactura
     {
         $this->factura = $factura;
     }
+
+
+
+    public function getXML(){
+        return [
+            'ItemDescription' => $this->elements->getConcepte(),
+            'Quantity' => $this->Unitats,
+            'UnitPriceWithoutTax' => $this->preuSenseImpostos,
+            'TotalCost' => $this->preuAmbImpostos*$this->Unitats,
+            'GrossAmount' => $this->preuAmbImpostos*$this->Unitats,
+            'TaxesOutputs' => [
+                'Tax' => [
+                    'TaxTypeCode' => $this->Impost->getType(),
+                    'TaxRate' => $this->Impost->getPercentatge(),
+                    'TaxableBase' => ['TotalAmount' => $this->preuAmbImpostos*$this->Unitats],
+                    'TaxAmount' => ['TotalAmount' => ($this->preuAmbImpostos-$this->preuSenseImpostos)*$this->Unitats],
+                ],
+            ],
+        ];
+    }
 }

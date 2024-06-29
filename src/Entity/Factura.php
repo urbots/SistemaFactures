@@ -59,7 +59,7 @@ class Factura
     private $numFactura;
 
     #[ORM\Column(nullable: true)]
-    private String $observacions;
+    private string $observacions;
 
     /**
      * @return mixed
@@ -92,6 +92,7 @@ class Factura
     {
         $this->numFactura = $numFactura;
     }
+
     public function __construct()
     {
         $this->elementsFactura = new ArrayCollection();
@@ -171,7 +172,8 @@ class Factura
         $this->elementsFactura->add($element);
     }
 
-    public function getNumero(){
+    public function getNumero()
+    {
         //año + numero factura con 4 ceros
         return $this->year . str_pad($this->numFactura, 4, "0", STR_PAD_LEFT);
     }
@@ -186,29 +188,31 @@ class Factura
         return $this->compteBancari;
     }
 
-    public function getImpostos(){
+    public function getImpostos()
+    {
         //retorna nom de cada impost i percentatge
         $impostos = [];
-        foreach ($this->elementsFactura as $element){
+        foreach ($this->elementsFactura as $element) {
             $impost = $element->getImpost();
-            if (!in_array($impost, $impostos)){
+            if (!in_array($impost, $impostos)) {
                 $impostos[] = $impost;
             }
         }
         return $impostos;
     }
 
-    public function senseImpostos(){
+    public function senseImpostos()
+    {
         $total = 0;
-        foreach ($this->elementsFactura as $element){
-            $total += $element->getPreuSenseImpostos()*$element->getUnitats();
+        foreach ($this->elementsFactura as $element) {
+            $total += $element->getPreuSenseImpostos() * $element->getUnitats();
         }
         return $total;
     }
 
     public function getObservacions(): string
     {
-        if (!isset($this->observacions) || $this->observacions == null){
+        if (!isset($this->observacions) || $this->observacions == null) {
             return "";
         }
         return $this->observacions;
@@ -219,14 +223,135 @@ class Factura
         $this->observacions = $observacions;
     }
 
-    public function getImportSpecificImpost($impost){
+    public function getImportSpecificImpost($impost)
+    {
         $total = 0;
-        foreach ($this->elementsFactura as $element){
-            if ($element->getImpost() == $impost){
-                $total += ($element->getPreuAmbImpostos() - $element->getPreuSenseImpostos())*$element->getUnitats();
+        foreach ($this->elementsFactura as $element) {
+            if ($element->getImpost() == $impost) {
+                $total += ($element->getPreuAmbImpostos() - $element->getPreuSenseImpostos()) * $element->getUnitats();
             }
         }
         return $total;
+    }
+
+    public function getDetailedImportSpecificImpost($impost): array
+    {
+        $base = 0;
+        $result = [];
+        $amount = 0;
+        foreach ($this->elementsFactura as $element) {
+            if ($element->getImpost() == $impost) {
+                $amount += ($element->getPreuAmbImpostos() - $element->getPreuSenseImpostos()) * $element->getUnitats();
+                $base += $element->getPreuSenseImpostos() * $element->getUnitats();
+            }
+        }
+        $result['TaxableBase'] = $base;
+        $result['TaxAmount'] = $amount;
+        return $result;
+    }
+
+    private function getTaxableInfo()
+    {
+        $taxes = $this->getImpostos();
+        $info = [];
+        foreach ($taxes as $tax) {
+            $amount = $this->getDetailedImportSpecificImpost($tax);
+            $info[] = [
+                'TaxTypeCode' => $tax->getType(),
+                'TaxRate' => $tax->getPercentatge(),
+                'TaxableBase' => ['TotalAmount' => $amount['TaxableBase']], //['TotalAmount' => '100.00000000'
+                'TaxAmount' => ['TotalAmount' => $amount['TaxAmount']],
+            ];
+        }
+        return $info;
+
+    }
+
+    private function getItemXML()
+    {
+        $arr = [];
+        foreach ($this->getElementsFactura() as $elem) {
+            $arr[] = $elem->getXML();
+        }
+        return $arr;
+    }
+
+    public function getXML()
+    {
+        $sinImpuestos = $this->senseImpostos();
+        $data = [
+            'FileHeader' => [
+                'SchemaVersion' => '3.2.2',
+                'Modality' => 'I',
+                'InvoiceIssuerType' => 'EM',
+                'Batch' => [
+                    'BatchIdentifier' => 'G5556596420240002F-',
+                    'InvoicesCount' => 1,
+                    'TotalInvoicesAmount' => ['TotalAmount' => $this->getTotal()],
+                    'TotalOutstandingAmount' => ['TotalAmount' => $this->getTotal()],
+                    'TotalExecutableAmount' => ['TotalAmount' => $this->getTotal()],
+                    'InvoiceCurrencyCode' => 'EUR',
+                ],
+            ],
+            'Parties' => [
+                'SellerParty' => [
+                    $this->getEmisor()->getXML(),
+                ],
+                'BuyerParty' => [
+                    $this->getReceptor()->getXML(),
+                ],
+            ],
+            'Invoices' => [
+                'Invoice' => [
+                    'InvoiceHeader' => [
+                        'InvoiceNumber' => $this->getNumero(),
+                        'InvoiceSeriesCode' => 'A',
+                        'InvoiceDocumentType' => 'FC',
+                        'InvoiceClass' => 'OO',
+                    ],
+                    'InvoiceIssueData' => [
+                        'IssueDate' => $this->getDataEmissio()->format('Y-m-d'),
+                        'PlaceOfIssue' => [
+                            'PostCode' => $this->getEmisor()->getCP(),
+                            'PlaceOfIssueDescription' => $this->getEmisor()->getCiutat(),
+                        ],
+                        'InvoiceCurrencyCode' => 'EUR',
+                        'TaxCurrencyCode' => 'EUR',
+                        'LanguageName' => 'es',
+                    ],
+                    'TaxesOutputs' => [
+                        'Tax' => $this->getTaxableInfo()
+                    ],
+                    'InvoiceTotals' => [
+                        'TotalGrossAmount' => $sinImpuestos,
+                        'TotalGeneralDiscounts' => '0.00000000',
+                        'TotalGeneralSurcharges' => '0.00',
+                        'TotalGrossAmountBeforeTaxes' => $sinImpuestos,
+                        'TotalTaxOutputs' => ($this->getTotal() - $sinImpuestos),
+                        'TotalTaxesWithheld' => '0.00000000',
+                        'InvoiceTotal' => $this->getTotal(),
+                        'TotalFinancialExpenses' => '0.00',
+                        'TotalOutstandingAmount' => $this->getTotal(),
+                        'TotalExecutableAmount' => $this->getTotal(),
+                    ],
+                    'Items' => [
+                        'InvoiceLine' => $this->getItemXML()
+                    ],
+                    'PaymentDetails' => [
+                        'Installment' => [
+                            'InstallmentDueDate' => $this->getDataEmissio()->format('Y-m-d'),
+                            'InstallmentAmount' =>  number_format($this->getTotal(), 2, '.', ''),
+                            'PaymentMeans' => '04',
+                            'AccountToBeCredited' => ['IBAN' => $this->getCompteBancari()->getIBAN()],
+                        ],
+                    ],
+                    'AdditionalData' => [
+                        'InvoiceAdditionalInformation' => $this->getObservacions(),
+                    ],
+                ],
+            ],
+        ];
+        return $data;
     }
 
 }
