@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Factures{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <h1>Factures</h1>
+        <a href="{{ path('app_factura_new') }}"><button class="btn btn-primary">Crear factura</button></a>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Numero</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Importe</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for factura in factures %}
+                    <tr>
+                        <td>{{ factura.numero }}</td>
+                        <td>{{ factura.fecha|date('d/m/Y') }}</td>
+                        <td>{{ factura.cliente.nombre }}</td>
+                        <td>{{ factura.importe }}</td>
+                        <td>
+                            <a href="{{ path('factura_show', {'id': factura.id}) }}">Ver</a>
+                            <a href="{{ path('factura_edit', {'id': factura.id}) }}">Editar</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

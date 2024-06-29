@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nova factura{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <h1>Nova factura</h1>
+
+        {{ form_start(form) }}
+        {{ form_row(form.numero) }}
+        {{ form_row(form.fecha) }}
+        {{ form_row(form.cliente) }}
+        {{ form_row(form.importe) }}
+    </div>
+{% endblock %}

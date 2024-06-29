@@ -25,13 +25,13 @@ class ElementFactura
     #[ORM\Column]
     private ?int $Unitats = null;
 
-    #[ORM\OneToMany(targetEntity: Factura::class, mappedBy: 'elementsFactura')]
+    #[ORM\ManyToOne(targetEntity: Factura::class, inversedBy: 'elements')]
     #[ORM\JoinColumn(nullable: false)]
-    private $factura;
+    private Factura $factura;
 
-    #[ORM\OneToMany(targetEntity: Elements::class, mappedBy: 'elementsFactura')]
+    #[ORM\ManyToOne(targetEntity: Elements::class, inversedBy: 'elementsFactura')]
     #[ORM\JoinColumn(nullable: false)]
-    private $elements;
+    private Elements $elements;
 
 
     public function getId(): ?int
