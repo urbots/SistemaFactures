@@ -5,6 +5,7 @@ namespace App\Controller;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -75,10 +76,18 @@ class FacturaController extends AbstractController
             ->add('dataEmissio', DateType::class, ['label' => 'Data d\'emissió'])
             ->add('total', IntegerType::class, ['label' => 'Total'])
             ->add('urlPDF', TextType::class, ['label' => 'URL PDF'])
-            ->add('elementsFactura', CollectionType::class, ['label' => 'Elements de la factura', 'entry_type' => EntityType::class, 'entry_options' => ['class' => 'App\Entity\Elements']])
+            ->add('elements', CollectionType::class, [
+                'entry_type' => EntityType::class,
+                'entry_options' => ['class' => 'App\Entity\ElementFactura'],
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
+                'label' => 'Elements'
+            ])
             ->add('compteBancari', EntityType::class, ['label' => 'Compte bancari', 'class' => 'App\Entity\CompteBancari'])
             ->add('emisor', EntityType::class, ['label' => 'Emisor', 'class' => 'App\Entity\PersonaEmpresa'])
             ->add('receptor', EntityType::class, ['label' => 'Receptor', 'class' => 'App\Entity\PersonaEmpresa'])
+            ->add('save', SubmitType::class, ['label' => 'Crear factura'])
             ->getForm();
         return $form;
     }

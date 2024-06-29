@@ -7,6 +7,31 @@
     <div class="container">
         <h1>Nova factura</h1>
 
-        {{ form(form) }}
+        {{ form_start(form) }}
+        {{ form_row(form.dataEmissio,{'attr': {'class': 'form-control'}}) }}
+        {{ form_row(form.compteBancari,{'attr': {'class': 'form-select'}}) }}
+        {{ form_row(form.emisor,{'attr': {'class': 'form-select'}}) }}
+        {{ form_row(form.receptor,{'attr': {'class': 'form-select'}}) }}
+        <hr>
+        <a href="#" id="add" class="btn btn-primary">Afegir producte</a>
+        <table>
+            <thead>
+                <tr>
+                    <th>Producte</th>
+                    <th>Quantitat</th>
+                    <th>Preu</th>
+                    <th>Import</th>
+                    <th>Accions</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+               {{ form_row(form.elements,{'attr': {'class': 'form-control'}}) }}
+            </tbody>
+        </table>
+        {{ form_row(form.total,{'attr': {'class': 'form-control'}}) }}
+        <br>
+        {{ form_row(form.save,{'attr': {'class': 'btn btn-primary'}}) }}
+
     </div>
+
 {% endblock %}

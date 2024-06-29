@@ -25,7 +25,7 @@ class ElementFactura
     #[ORM\Column]
     private ?int $Unitats = null;
 
-    #[ORM\ManyToOne(targetEntity: Factura::class, inversedBy: 'elements')]
+    #[ORM\ManyToOne(targetEntity: Factura::class, inversedBy: 'elementsFactura')]
     #[ORM\JoinColumn(nullable: false)]
     private Factura $factura;
 
