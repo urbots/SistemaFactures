@@ -22,8 +22,9 @@ class Elements
     #[ORM\Column]
     private ?int $preuSenseImpostos = null;
 
-    #[ORM\Column]
-    private ?float $Impost = null;
+    #[ORM\ManyToOne(targetEntity: Impost::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private Impost $Impost;
 
     #[ORM\OneToMany(targetEntity: ElementFactura::class, mappedBy: 'elements')]
     #[ORM\JoinColumn(nullable: false)]
@@ -70,12 +71,12 @@ class Elements
         return $this;
     }
 
-    public function getImpost(): ?float
+    public function getImpost(): Impost
     {
         return $this->Impost;
     }
 
-    public function setImpost(float $Impost): static
+    public function setImpost(Impost $Impost): static
     {
         $this->Impost = $Impost;
 
