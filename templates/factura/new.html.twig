@@ -30,7 +30,7 @@
 
             </tbody>
         </table>
-        {{ form_row(form.total,{'attr': {'class': 'form-control'}}) }}
+        {{ form_row(form.total,{'attr': {'class': 'form-control','step': '0.01'}}) }}
         {{ form_row(form.Observacions,{'attr': {'class': 'form-control'}}) }}
         <br>
         {{ form_row(form.save,{'attr': {'class': 'btn btn-primary'}}) }}
@@ -56,7 +56,7 @@
                 <label for="quantitat">Quantitat</label>
                 <input type="number" name="quantitat" id="quantitat" class="form-control" onchange="calcularQuantitat()">
                 <label for="preuSenseImpostos">Preu sense impostos</label>
-                <input type="number" name="preuSenseImpostos" id="preuSenseImpostos" class="form-control" onchange="calcularPreuAmbImpostos()">
+                <input type="number" name="preuSenseImpostos" id="preuSenseImpostos" class="form-control" onchange="calcularPreuAmbImpostos()" step="0.01">
                 <label for="impostos">Impostos</label>
                 <select name="impostos" id="impostos" class="form-select">
                     <option value="">Selecciona un impost</option>
@@ -65,9 +65,9 @@
                 {% endfor %}
                 </select>
                 <label for="preuAmbImpostos">Preu amb impostos</label>
-                <input type="number" name="preuAmbImpostos" id="preuAmbImpostos" class="form-control" onchange="calcularPreuSenseImpostos()">
+                <input type="number" name="preuAmbImpostos" id="preuAmbImpostos" class="form-control" onchange="calcularPreuSenseImpostos()" step="0.01">
                 <label for="total">Total</label>
-                <input type="number" name="total" id="total" class="form-control">
+                <input type="number" name="total" id="total" class="form-control" step="0.01">
                 <a onclick="afegirProducte()" class="btn btn-primary">Afegir</a>
             </div>
         </div>
@@ -107,7 +107,7 @@
         function calcularPreu() {
             let producte = document.getElementById('producte').value;
             //buscar producte al array
-            producte = productes.find(p => p.id === parseInt(producte));
+            producte = productes.find(p => p.id === parseFloat(producte));
             document.getElementById('preuSenseImpostos').value = producte.preuSenseImpostos;
             document.getElementById('impostos').value = producte.impostos;
             document.getElementById('preuAmbImpostos').value = producte.preuAmbImpostos;
@@ -115,23 +115,23 @@
         }
 
         function calcularQuantitat() {
-            let quantitat = parseInt(document.getElementById('quantitat').value);
-            let preuAmbImpostos = parseInt(document.getElementById('preuAmbImpostos').value)
+            let quantitat = parseFloat(document.getElementById('quantitat').value);
+            let preuAmbImpostos = parseFloat(document.getElementById('preuAmbImpostos').value)
             let total = quantitat * preuAmbImpostos;
             document.getElementById('total').value = total;
         }
 
         function calcularPreuAmbImpostos(){
-            let preuSenseImpostos = parseInt(document.getElementById('preuSenseImpostos').value);
-            let impostos = parseInt(document.getElementById('impostos').value);
+            let preuSenseImpostos = parseFloat(document.getElementById('preuSenseImpostos').value);
+            let impostos = parseFloat(document.getElementById('impostos').value);
             impostos = imposts.find(i => i.id === impostos).percentatge;
             let preuAmbImpostos = preuSenseImpostos + (preuSenseImpostos * impostos / 100);
             document.getElementById('preuAmbImpostos').value = preuAmbImpostos;
         }
 
         function calcularPreuSenseImpostos(){
-            let preuAmbImpostos = parseInt(document.getElementById('preuAmbImpostos').value);
-            let impostos = parseInt(document.getElementById('impostos').value);
+            let preuAmbImpostos = parseFloat(document.getElementById('preuAmbImpostos').value);
+            let impostos = parseFloat(document.getElementById('impostos').value);
             impostos = imposts.find(i => i.id === impostos).percentatge;
             let preuSenseImpostos = preuAmbImpostos / (1 + (impostos / 100));
             document.getElementById('preuSenseImpostos').value = preuSenseImpostos;
@@ -146,7 +146,7 @@
             let total = document.getElementById('total').value;
             let tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><input type="hidden" name="productes[]" value="${producte}">${productes.find(p => p.id === parseInt(producte)).concepte}</td>
+                <td><input type="hidden" name="productes[]" value="${producte}">${productes.find(p => p.id === parseFloat(producte)).concepte}</td>
                 <td><input type="number" name="quantitats[]" value="${quantitat}" class="form-control"></td>
                 <td><input type="number" name="preusSenseImpostos[]" value="${preuSenseImpostos}" class="form-control"></td>
                 <td><input type="number" name="impostos[]" value="${impostos}" class="form-control"></td>
@@ -159,9 +159,9 @@
             //calcular total factura
             let totalFactura = 0;
             document.querySelectorAll('input[name="totals[]"]').forEach(input => {
-                totalFactura += parseInt(input.value);
+                totalFactura += parseFloat(input.value);
             });
-            totalFactura += parseInt(total);
+            totalFactura += parseFloat(total);
             document.getElementById('form_total').value = totalFactura;
 
             document.getElementById('tbody').appendChild(tr);
@@ -175,8 +175,8 @@
         }
         function eliminarProducte(boton){
             let tr = boton.parentNode.parentNode;
-            let total = parseInt(tr.querySelector('input[name="totals[]"]').value);
-            let totalFactura = parseInt(document.getElementById('form_total').value);
+            let total = parseFloat(tr.querySelector('input[name="totals[]"]').value);
+            let totalFactura = parseFloat(document.getElementById('form_total').value);
             totalFactura -= total;
             document.getElementById('form_total').value = totalFactura;
             tr.remove();

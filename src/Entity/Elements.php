@@ -47,7 +47,7 @@ class Elements
         return $this;
     }
 
-    public function getPreuUnitari(): ?int
+    public function getPreuUnitari(): ?float
     {
         return $this->preuUnitari;
     }
@@ -59,7 +59,7 @@ class Elements
         return $this;
     }
 
-    public function getPreuSenseImpostos(): ?int
+    public function getPreuSenseImpostos(): ?float
     {
         return $this->preuSenseImpostos;
     }
