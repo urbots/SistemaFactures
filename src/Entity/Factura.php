@@ -20,7 +20,7 @@ class Factura
     private ?\DateTimeInterface $dataEmissio = null;
 
     #[ORM\Column]
-    private ?int $total = null;
+    private ?float $total = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $urlPDF = null;
@@ -122,12 +122,12 @@ class Factura
         return $this;
     }
 
-    public function getTotal(): ?int
+    public function getTotal(): ?float
     {
         return $this->total;
     }
 
-    public function setTotal(int $total): static
+    public function setTotal(float $total): static
     {
         $this->total = $total;
 

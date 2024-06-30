@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\ElementFactura;
 use App\Entity\Elements;
 use DateTime;
+use Doctrine\DBAL\Types\FloatType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +23,8 @@ use App\Entity\Factura;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
+
+use TCPDF;
 
 
 class FacturaController extends AbstractController
@@ -137,9 +141,9 @@ class FacturaController extends AbstractController
         $html = $this->renderView('factura/pdf.html.twig', [
             'factura' => $factura
         ]);
-        $pdf = new \TCPDF();
+        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         $pdf->SetCreator(PDF_CREATOR);
-        $pdf->SetAuthor('Nicola');
+        $pdf->SetAuthor($factura->getEmisor()->getNomComplet());
         $pdf->SetTitle('Factura');
         $pdf->SetSubject('Factura');
         $pdf->SetKeywords('Factura');
@@ -189,11 +193,11 @@ class FacturaController extends AbstractController
     {
         $form = $this->createFormBuilder()
             ->add('dataEmissio', DateType::class, ['label' => 'Data d\'emissió', 'widget' => 'single_text'])
-            ->add('total', IntegerType::class, ['label' => 'Total'])
+            ->add('total', NumberType::class, ['label' => 'Total'])
             ->add('compteBancari', EntityType::class, ['label' => 'Compte bancari', 'class' => 'App\Entity\CompteBancari', 'choice_label' => 'Referencia'])
             ->add('emisor', EntityType::class, ['label' => 'Emisor', 'class' => 'App\Entity\PersonaEmpresa'])
             ->add('receptor', EntityType::class, ['label' => 'Receptor', 'class' => 'App\Entity\PersonaEmpresa'])
-            ->add('Observacions', TextAreaType::class, ['label' => 'Observacions'])
+            ->add('Observacions', TextAreaType::class, ['label' => 'Observacions', 'required' => false])
             ->add('save', SubmitType::class, ['label' => 'Crear factura'])
             ->getForm();
         return $form;

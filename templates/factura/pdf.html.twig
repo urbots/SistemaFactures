@@ -1,0 +1,108 @@
+
+{% block stylesheets %}
+
+{% endblock %}
+
+
+{% block body %}
+
+    <style>
+        th{
+            font-size: 14px;
+            font-weight: bold;
+            text-align: left;
+        }
+        p{
+            font-size: 14px;
+            line-height: 1.2;
+        }
+        td{
+            border: 1px solid black;
+            text-align: center;
+        }
+    </style>
+    <div class="container">
+        <h1>Factura #{{ factura.numero }}</h1>
+        <p>Data d'emissió: {{ factura.dataEmissio|date('d/m/Y') }}</p>
+        <table style="width: 100%;">
+            <tr>
+                <td style="width: 50%; border: none; text-align: left;">
+                    <h2>Emisor</h2>
+                    <p>{{ factura.emisor.getNomComplet }}</p>
+                    <p>{{ factura.emisor.Carrer }}</p>
+                    <p>{{ factura.emisor.Ciutat }} - {{ factura.emisor.CP }} ({{ factura.emisor.Provincia }},
+                        Espanya)</p>
+                    <p>{{ factura.emisor.nif }}</p>
+                </td>
+                <td style="width: 50%; border: none; text-align: right;">
+                    <h2>Client</h2>
+                    <p>{{ factura.receptor.getNomComplet }}</p>
+                    <p>{{ factura.receptor.Carrer }}</p>
+                    <p>{{ factura.receptor.Ciutat }} - {{ factura.receptor.CP }} ({{ factura.receptor.Provincia }},
+                        Espanya)</p>
+                    <p>{{ factura.receptor.nif }}</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="container">
+
+        <table class="table" >
+
+            <thead>
+                <tr>
+                    <th>Producte</th>
+                    <th>Quantitat</th>
+                    <th>Preu sense impostos</th>
+                    <th>Impostos</th>
+                    <th>Preu amb impostos</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for linia in factura.elementsFactura %}
+                    <tr>
+                        <td>{{ linia.elements.Concepte }}</td>
+                        <td>{{ linia.Unitats }}</td>
+                        <td>{{ linia.preuSenseImpostos }}</td>
+                        <td>{{ linia.Impost }}</td>
+                        <td>{{ linia.preuAmbImpostos }}</td>
+                        <td>{{ linia.preuAmbImpostos * linia.Unitats }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="container">
+        <br>
+        <table class="table table-bordered right col-md-4" >
+            <tbody>
+                <tr>
+                    <td colspan="2">Base Imponible</td>
+                    <td>{{ factura.senseImpostos }}</td>
+                </tr>
+                {% for impost in factura.impostos %}
+                    <tr>
+                        <td colspan="2">{{ impost.nom }} ({{ impost.percentatge }}%)</td>
+                        <td>{{ factura.getImportSpecificImpost(impost) }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="2"><b>Total</b></td>
+                    <td><b>{{ factura.total }}</b></td>
+
+                </tr>
+            </tbody>
+        </table>
+
+        <hr>
+
+        <p><b>OBSERVACIONS:</b> {{ factura.getObservacions }}</p>
+        <hr>
+        <p><b>PAGAMENT:</b></p>
+        <p>IBAN: {{ factura.compteBancari.IBAN }}</p>
+        <p>Entitat: {{ factura.compteBancari.Entitat }}</p>
+        <p>SWIFT: {{ factura.compteBancari.SWIFT }}</p>
+    </div>
+
+{% endblock %}
