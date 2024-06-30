@@ -2,16 +2,21 @@
 
 namespace App\Controller;
 
+use App\Entity\Empresa;
+use App\Entity\Persona;
 use App\Entity\PersonaEmpresa;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Constraints\Choice;
 
 class PersonaEmpresaController extends AbstractController
 {
@@ -51,8 +56,16 @@ class PersonaEmpresaController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $personaEmpresa = $form->getData();
-            $personaEmpresa = new PersonaEmpresa();
-            $personaEmpresa->setNomComplet($form->get('NomComplet')->getData());
+            if ($form->get('type')->getData() == 'Persona') {
+                $personaEmpresa = new Persona();
+                $personaEmpresa->setNom($form->get('nom')->getData());
+                $personaEmpresa->setCognom1($form->get('cognom1')->getData());
+                $personaEmpresa->setCognom2($form->get('cognom2')->getData());
+            } else {
+                $personaEmpresa = new Empresa();
+                $personaEmpresa->setRaoSocial($form->get('RaoSocial')->getData());
+                $personaEmpresa->setNomComercial($form->get('NomComercial')->getData());
+            }
             $personaEmpresa->setNIF($form->get('NIF')->getData());
             $personaEmpresa->setCarrer($form->get('Carrer')->getData());
             $personaEmpresa->setCiutat($form->get('Ciutat')->getData());
@@ -84,7 +97,16 @@ class PersonaEmpresaController extends AbstractController
     {
         $personaEmpresa = $this->getDoctrine()->getRepository(PersonaEmpresa::class)->find($id);
         $form = $this->getForm(true);
-        $form->get('NomComplet')->setData($personaEmpresa->getNomComplet());
+        if ($personaEmpresa instanceof Persona) {
+            $form->get('type')->setData('Persona');
+            $form->get('nom')->setData($personaEmpresa->getNom());
+            $form->get('cognom1')->setData($personaEmpresa->getCognom1());
+            $form->get('cognom2')->setData($personaEmpresa->getCognom2());
+        } else {
+            $form->get('type')->setData('Empresa');
+            $form->get('RaoSocial')->setData($personaEmpresa->getRaoSocial());
+            $form->get('NomComercial')->setData($personaEmpresa->getNomComercial());
+        }
         $form->get('NIF')->setData($personaEmpresa->getNIF());
         $form->get('Carrer')->setData($personaEmpresa->getCarrer());
         $form->get('Ciutat')->setData($personaEmpresa->getCiutat());
@@ -104,7 +126,14 @@ class PersonaEmpresaController extends AbstractController
         $form = $this->getForm();
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $personaEmpresa->setNomComplet($form->get('NomComplet')->getData());
+            if ($personaEmpresa instanceof Persona) {
+                $personaEmpresa->setNom($form->get('nom')->getData());
+                $personaEmpresa->setCognom1($form->get('cognom1')->getData());
+                $personaEmpresa->setCognom2($form->get('cognom2')->getData());
+            } else {
+                $personaEmpresa->setRaoSocial($form->get('RaoSocial')->getData());
+                $personaEmpresa->setNomComercial($form->get('NomComercial')->getData());
+            }
             $personaEmpresa->setNIF($form->get('NIF')->getData());
             $personaEmpresa->setCarrer($form->get('Carrer')->getData());
             $personaEmpresa->setCiutat($form->get('Ciutat')->getData());
@@ -135,7 +164,23 @@ class PersonaEmpresaController extends AbstractController
     public function getForm($update = false)
     {
         $form = $this->createFormBuilder()
-            ->add('NomComplet', TextType::class, ['label' => 'Nom Complet'])
+            ->add('type', ChoiceType::class, [
+                'choices' => [
+                    'Selecciona un tipus' => '',
+                    'Persona' => 'Persona',
+                    'Empresa' => 'Empresa',
+                    'Empresa Publica' => 'Empresa Publica'
+                ],
+                'label' => 'Tipus',
+                'constraints' => [
+                    new Choice(['choices' => ['Persona', 'Empresa', 'Empresa Publica']])
+                ]
+            ])
+            ->add('nom', TextType::class, ['label' => 'Nom','required' => false])
+            ->add('cognom1', TextType::class, ['label' => 'Cognoms','required' => false])
+            ->add('cognom2', TextType::class, ['label' => 'Cognoms','required' => false])
+            ->add('RaoSocial', TextType::class, ['label' => 'Rao Social','required' => false])
+            ->add('NomComercial', TextType::class, ['label' => 'Nom Comercial','required' => false])
             ->add('NIF', TextType::class, ['label' => 'NIF'])
             ->add('Carrer', TextType::class, ['label' => 'Carrer'])
             ->add('Ciutat', TextType::class, ['label' => 'Ciutat'])

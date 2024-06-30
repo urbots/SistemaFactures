@@ -9,17 +9,14 @@ use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: PersonaEmpresaRepository::class)]
 #[ORM\InheritanceType('SINGLE_TABLE')]
-#[ORM\DiscriminatorColumn(name: 'type', type: 'string')]
-#[ORM\DiscriminatorMap(['personaEmpresa' => 'PersonaEmpresa', 'empresaPublica' => 'EmpresaPublica'])]
-class PersonaEmpresa
+#[ORM\DiscriminatorColumn(name: 'type', type: 'string', length: 255)]
+#[ORM\DiscriminatorMap(['persona' => 'Persona', 'empresa' => 'Empresa', 'empresa_publica' => 'EmpresaPublica'])]
+abstract class PersonaEmpresa
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $NomComplet = null;
+    protected ?int $id = null;
     #[ORM\Column(length: 255)]
     private ?string $NIF = null;
 
@@ -119,15 +116,12 @@ class PersonaEmpresa
         $this->NomComplet = $getData;
     }
 
-    public function getNomComplet()
+    public function __toString() : string
     {
-        return $this->NomComplet;
+        return $this->getNom() ? : '';
     }
 
-    public function __toString()
-    {
-        return $this->NomComplet;
-    }
+    public abstract function getNomComplet();
 
     public function getXMLAddress(){
         return [
@@ -141,24 +135,25 @@ class PersonaEmpresa
         ];
     }
 
-    public function getXML()
-    {
-        return [
-            'TaxIdentification' => [
-                'PersonTypeCode' => $this->isPersonaJuridica() ? 'J' : 'F',
-                'ResidenceTypeCode' => 'R',
-                'TaxIdentificationNumber' => $this->getNIF(),
-            ],
-            'LegalEntity' => [
-                'CorporateName' => $this->getNomComplet(),
-                'AddressInSpain' => $this->getXMLAddress()
-            ]
-        ];
-    }
+    public abstract function getXML();
+//    {
+//        return [
+//            'TaxIdentification' => [
+//                'PersonTypeCode' => $this->isPersonaJuridica() ? 'J' : 'F',
+//                'ResidenceTypeCode' => 'R',
+//                'TaxIdentificationNumber' => $this->getNIF(),
+//            ]
+//        ];
+//    }
 
     protected function isPersonaJuridica()
     {
         //si empieza por letra es juridica
         return ctype_alpha($this->getNIF()[0]);
     }
+
+    public abstract function getNom();
+
+    public abstract function getType(): string;
+
 }

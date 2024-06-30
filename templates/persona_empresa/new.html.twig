@@ -9,7 +9,18 @@
         <a href="{{ path('app_persona_empresa') }}" class="btn btn-primary">Tornar</a>
         <h1>Crear Persona/Empresa</h1>
         {{ form_start(form, {'attr': {'url': path('persona_empresa_create')}}) }}
-        {{ form_row(form.NomComplet, {'attr': {'class': 'form-control'}}) }}
+        {{ form_row(form.type, {'attr': {'class': 'form-select', 'onchange': 'showHide()','placeholder': 'Selecciona una opció'}}) }}
+        <hr>
+        <div id="persona" style="display: none;">
+            {{ form_row(form.nom, {'attr': {'class': 'form-control'}}) }}
+            {{ form_row(form.cognom1, {'attr': {'class': 'form-control'}}) }}
+            {{ form_row(form.cognom2, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <div id="empresa" style="display: none;">
+            {{ form_row(form.RaoSocial, {'attr': {'class': 'form-control'}}) }}
+            {{ form_row(form.NomComercial, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <hr>
         {{ form_row(form.NIF, {'attr': {'class': 'form-control'}}) }}
         {{ form_row(form.Carrer, {'attr': {'class': 'form-control'}}) }}
         {{ form_row(form.CP, {'attr': {'class': 'form-control'}}) }}
@@ -18,4 +29,18 @@
         {{ form_row(form.save, {'attr': {'class': 'btn btn-primary'}}) }}
         {{ form_end(form) }}
     </div>
+    <script>
+        function showHide() {
+            var x = document.getElementById("persona");
+            var y = document.getElementById("empresa");
+            var z = document.getElementById("form_type");
+            if (z.value == "Persona") {
+                x.style.display = "block";
+                y.style.display = "none";
+            } else {
+                x.style.display = "none";
+                y.style.display = "block";
+            }
+        }
+    </script>
 {% endblock %}
