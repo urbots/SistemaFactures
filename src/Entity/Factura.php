@@ -285,7 +285,7 @@ class Factura
                 'Modality' => 'I',
                 'InvoiceIssuerType' => 'EM',
                 'Batch' => [
-                    'BatchIdentifier' => 'G5556596420240002F-',
+                    'BatchIdentifier' => $this->getEmisor()->getNIF() . $this->getNumero(),
                     'InvoicesCount' => 1,
                     'TotalInvoicesAmount' => ['TotalAmount' => $this->getTotal()],
                     'TotalOutstandingAmount' => ['TotalAmount' => $this->getTotal()],

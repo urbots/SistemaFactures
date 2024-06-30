@@ -12,6 +12,7 @@
                 <tr>
                     <th>Numero</th>
                     <th>Fecha</th>
+                    <th>Emisor</th>
                     <th>Cliente</th>
                     <th>Importe</th>
                     <th>Acciones</th>
@@ -22,7 +23,8 @@
                     <tr>
                         <td>{{ factura.numero }}</td>
                         <td>{{ factura.dataEmissio|date('d/m/Y') }}</td>
-                        <td>{{ factura.receptor.nomComplet }}</td>
+                        <td>{{ factura.emisor.getNomComplet }}</td>
+                        <td>{{ factura.receptor.getNomComplet }}</td>
                         <td>{{ factura.total }}</td>
                         <td>
                             <a href="{{ path('app_factura_show', {'id': factura.id}) }}">Ver</a>
