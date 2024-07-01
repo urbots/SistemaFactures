@@ -2,13 +2,17 @@
 
 namespace App\Controller;
 
+use App\Entity\CompteBancari;
 use App\Entity\ElementFactura;
 use App\Entity\Elements;
+use App\Entity\Persona;
 use DateTime;
 use Doctrine\DBAL\Types\FloatType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,9 +46,11 @@ class FacturaController extends AbstractController
     public function index(): Response
     {
         $factures = $this->getDoctrine()->getRepository(Factura::class)->findAll();
+        $formCSV = $this->getFormFromCSV();
         return $this->render('factura/index.html.twig', [
             'controller_name' => 'FacturaController',
-            'factures' => $factures
+            'factures' => $factures,
+            'formCSV' => $formCSV->createView()
         ]);
     }
 
@@ -184,6 +190,124 @@ class FacturaController extends AbstractController
 
         return $response;
 
+    }
+
+    // Crear factura a partir de un csv
+
+    public function getFormFromCSV(): \Symfony\Component\Form\FormInterface
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('app_factura_csv_create'))
+            ->add('csv', FileType::class, ['label' => 'Fitxer CSV','attr'=>[ 'class' => 'form-control']])
+            ->add('posarMateixNumero', CheckboxType::class, ['label' => 'Posar el mateix número de factura', 'required' => false,'attr'=>[ 'class' => 'form-check-input', 'onchange' => 'showNumFactura()']])
+            ->add('numFactura', IntegerType::class, ['label' => 'Número de factura', 'required' => false,'attr'=>[ 'class' => 'form-control']])
+            ->add('dataEmissio', DateType::class, ['label' => 'Data d\'emissió', 'widget' => 'single_text','attr'=>[ 'class' => 'form-control']])
+            ->add('Comentari', TextareaType::class, ['label' => 'Comentari', 'required' => false,'attr'=>[ 'class' => 'form-control']])
+            ->add('save', SubmitType::class, ['label' => 'Crear factura','attr'=>[ 'class' => 'btn btn-primary']])
+            ->getForm();
+    }
+
+    // Crear factura a partir de un csv
+    #[Route('/factura/csv', name: 'app_factura_csv_create', methods: ['POST'])]
+    public function generateFromCSV(Request $request): Response
+    {
+        $form = $this->getFormFromCSV();
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            //llegim el fitxer del formulari
+            $file = $form->getData()['csv'];
+            $data = file_get_contents($file);
+            $lines = explode("\n", $data);
+            $i = 0;
+            //start transaction
+            $this->getDoctrine()->getConnection()->beginTransaction();
+            foreach ($lines as $line){
+                //ignorem la primera linia
+                if ($i == 0) {
+                    $i++;
+                    continue;
+                }
+                //primeres columnes Nom	Cognom 1	Cognom 2	Adreça	Codi Postal	Ciutat/Poble	Provincia	NIF (DNI / NIE )	Correu electrònic (NO URV)	Teléfon
+                //creem una persona
+                $persona = new Persona();
+                $cols = explode(';', $line);
+                if(count($cols) < 16){
+                    error_log('Linea '.$i.' no te suficients columnes');
+                    continue;
+                }
+                $persona->setNom(mb_convert_encoding($cols[0], 'UTF-8', 'auto'));
+                $persona->setCognom1(mb_convert_encoding($cols[1], 'UTF-8', 'auto'));
+                $persona->setCognom2(mb_convert_encoding($cols[2], 'UTF-8', 'auto'));
+                $persona->setCarrer(mb_convert_encoding($cols[3], 'UTF-8', 'auto'));
+                $persona->setCP($cols[4]);
+                $persona->setCiutat($cols[5]);
+                $persona->setProvincia($cols[6]);
+                $persona->setNIF($cols[7]);
+                //de moment no posem correu ni telefon
+                $entityManager = $this->getDoctrine()->getManager();
+                $entityManager->persist($persona);
+                $entityManager->flush();
+
+                //IBAN	SWIFT	Entitat, creem un compte bancari amb referencia COMPTE_NOM_COGNOM1_COGNOM2
+                $compte = new CompteBancari();
+                $compte->setIBAN($cols[10]);
+                $compte->setSWIFT($cols[11]);
+                $compte->setEntitat($cols[12]);
+                $compte->setReferencia('COMPTE_'.$persona->getNom().'_'.$persona->getCognom1().'_'.$persona->getCognom2());
+                $entityManager->persist($compte);
+                $entityManager->flush();
+
+                //Id_element	Quantitat
+                $producte = $this->getDoctrine()->getRepository(Elements::class)->findOneBy(['id' => $cols[13]]);
+                if($producte == null){
+                    error_log('Producte amb id '.$cols[11].' no trobat');
+                }
+                $element = new ElementFactura();
+                $quantitat = intval($cols[14]);
+                $element->setUnitats($quantitat);
+                $element->setPreuSenseImpostos($producte->getPreuSenseImpostos() * $quantitat);
+                $element->setImpost($producte->getImpost());
+                $element->setPreuAmbImpostos($producte->getPreuUnitari() * $quantitat);
+                $element->setElements($producte);
+
+                //Id_Receptor
+                $receptor = $this->getDoctrine()->getRepository('App\Entity\PersonaEmpresa')->findOneBy(['id' => $cols[15]]);
+                if($receptor == null){
+                    error_log('Receptor amb id '.$cols[13].' no trobat');
+                }
+
+                //Creem la factura
+                $factura = new Factura();
+                $factura->setDataEmissio($form->getData()['dataEmissio']);
+                $factura->setYear($form->getData()['dataEmissio']->format('Y'));
+                //si está marcat posarMateixNumero treiem el número de la factura del formulari
+                if ($form->getData()['posarMateixNumero']) {
+                    $factura->setNumFactura($form->getData()['numFactura']);
+                } else {
+                    //buscamos el numero de factura mas alto de ese año
+                    $factures = $this->getDoctrine()->getRepository(Factura::class)->findBy(['year' => $factura->getYear()]);
+                    $max = 0;
+                    foreach ($factures as $facture) {
+                        $num = intval($facture->getNumFactura());
+                        if ($num > $max) {
+                            $max = $num;
+                        }
+                    }
+                    $factura->setNumFactura($max + 1);
+                }
+                $factura->setTotal($element->getPreuAmbImpostos());
+                $factura->setEmisor($persona);
+                $factura->setReceptor($receptor);
+                $factura->setCompteBancari($compte);
+                $factura->addElement($element);
+                $factura->setObservacions($form->getData()['Comentari']);
+                $element->setFactura($factura);
+                $entityManager->persist($factura);
+                $entityManager->flush();
+            }
+            $entityManager->commit();
+        }
+        return $this->redirectToRoute('app_factura');
     }
 
     /**

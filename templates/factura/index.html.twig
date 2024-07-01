@@ -7,6 +7,7 @@
     <div class="container">
         <h1>Factures</h1>
         <a href="{{ path('app_factura_new') }}"><button class="btn btn-primary">Crear factura</button></a>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">Importar factura</button>
         <table class="table">
             <thead>
                 <tr>
@@ -34,4 +35,18 @@
             </tbody>
         </table>
     </div>
+    <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Importar factura</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form(formCSV) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
