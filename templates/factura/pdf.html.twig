@@ -8,22 +8,28 @@
 
     <style>
         th{
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
             text-align: left;
+            border-bottom: 1px solid black;
         }
         p{
             font-size: 14px;
             line-height: 1.2;
         }
         td{
-            border: 1px solid black;
             text-align: center;
+            font-size: 12px;
+        }
+        h1{
+            font-size: 24px;
+            font-weight: bold;
+            line-height: 1.2;
         }
     </style>
     <div class="container">
         <h1>Factura #{{ factura.numero }}</h1>
-        <p>Data d'emissió: {{ factura.dataEmissio|date('d/m/Y') }}</p>
+        <p>Fecha emisión: {{ factura.dataEmissio|date('d/m/Y') }}</p>
         <table style="width: 100%;">
             <tr>
                 <td style="width: 50%; border: none; text-align: left;">
@@ -51,22 +57,22 @@
 
             <thead>
                 <tr>
-                    <th>Producte</th>
-                    <th>Quantitat</th>
-                    <th>Preu sense impostos</th>
-                    <th>Impostos</th>
-                    <th>Preu amb impostos</th>
+                    <th colspan="6">Concepto</th>
+                    <th>Precio</th>
+                    <th>Unidades</th>
+                    <th>Subtotal</th>
+                    <th>Impuesto</th>
                     <th>Total</th>
                 </tr>
             </thead>
             <tbody>
                 {% for linia in factura.elementsFactura %}
                     <tr>
-                        <td>{{ linia.elements.Concepte }}</td>
-                        <td>{{ linia.Unitats }}</td>
+                        <td colspan="6">{{ linia.elements.Concepte }}</td>
                         <td>{{ linia.preuSenseImpostos }}</td>
+                        <td>{{ linia.Unitats }}</td>
+                        <td>{{ linia.preuSenseImpostos *  linia.Unitats}}</td>
                         <td>{{ linia.Impost }}</td>
-                        <td>{{ linia.preuAmbImpostos }}</td>
                         <td>{{ linia.preuAmbImpostos * linia.Unitats }}</td>
                     </tr>
                 {% endfor %}
@@ -97,11 +103,11 @@
 
         <hr>
 
-        <p><b>OBSERVACIONS:</b> {{ factura.getObservacions }}</p>
+        <p><b>OBSERVACIONES:</b> {{ factura.getObservacions }}</p>
         <hr>
-        <p><b>PAGAMENT:</b></p>
+        <p><b>PAGO:</b></p>
         <p>IBAN: {{ factura.compteBancari.IBAN }}</p>
-        <p>Entitat: {{ factura.compteBancari.Entitat }}</p>
+        <p>Entidad: {{ factura.compteBancari.Entitat }}</p>
         <p>SWIFT: {{ factura.compteBancari.SWIFT }}</p>
     </div>
 
