@@ -278,6 +278,8 @@ class Factura
 
     public function getXML()
     {
+        $dueDate = clone $this->getDataEmissio();
+        $dueDate->modify('+30 days');
         $sinImpuestos = $this->senseImpostos();
         $data = [
             'FileHeader' => [
@@ -339,10 +341,10 @@ class Factura
                     ],
                     'PaymentDetails' => [
                         'Installment' => [
-                            'InstallmentDueDate' => $this->getDataEmissio()->format('Y-m-d'),
-                            'InstallmentAmount' =>  number_format($this->getTotal(), 2, '.', ''),
+                            'InstallmentDueDate' => $dueDate->format('Y-m-d'),
+                            'InstallmentAmount' =>  number_format(max($this->getTotal(), $sinImpuestos), 2, '.', ''),
                             'PaymentMeans' => '04',
-                            'AccountToBeCredited' => ['IBAN' => $this->getCompteBancari()->getIBAN()],
+                            'AccountToBeCredited' => $this->getCompteBancari()->getXML(),
                         ],
                     ],
                     'AdditionalData' => [

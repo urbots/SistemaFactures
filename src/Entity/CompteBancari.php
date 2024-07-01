@@ -48,12 +48,16 @@ class CompteBancari
 
     public function getSWIFT(): ?string
     {
-        return $this->SWIFT;
+        //11 characters, ponemos tantas X para que llegue a 11
+
+        return $this->SWIFT. str_repeat('X', 11 - strlen($this->SWIFT));
     }
 
     public function setSWIFT(string $SWIFT): static
     {
-        $this->SWIFT = $SWIFT;
+        //11 characters, ponemos tantas X para que llegue a 11
+        $this->SWIFT = $SWIFT . str_repeat('X', 11 - strlen($SWIFT));
+
 
         return $this;
     }
@@ -85,5 +89,10 @@ class CompteBancari
     public function __toString(): string
     {
         return "IBAN: " . $this->IBAN . "<br>SWIFT: " . $this->SWIFT . "<br>Entitat: " . $this->Entitat . "";
+    }
+
+    public function getXML()
+    {
+        return ['IBAN' => $this->getIBAN(), 'BIC' => $this->getSWIFT()];
     }
 }
