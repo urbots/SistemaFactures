@@ -159,7 +159,7 @@ class FacturaController extends AbstractController
         $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
         $pdf->AddPage();
         $pdf->writeHTML($html, true, false, true, false, '');
-        $pdf->Output('factura.pdf', 'I');
+        $pdf->Output('FAC-'.urlencode($factura->getEmisor()->getNomComplet()).'-'.$factura->getNumFactura().'.pdf', 'D');
         return new Response();
     }
 
@@ -186,7 +186,7 @@ class FacturaController extends AbstractController
 
         $response = new Response($xmlContent);
         $response->headers->set('Content-Type', 'application/xml');
-        $response->headers->set('Content-Disposition', 'attachment; filename="factura.xml"');
+        $response->headers->set('Content-Disposition', 'attachment; filename="FAC-'.urlencode($factura->getEmisor()->getNomComplet()).'-'.$factura->getNumFactura().'.xml"');
 
         return $response;
 
