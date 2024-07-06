@@ -235,10 +235,10 @@ class FacturaController extends AbstractController
                     error_log('Linea '.$i.' no te suficients columnes');
                     continue;
                 }
-                $persona->setNom(mb_convert_encoding($cols[0], 'UTF-8', 'auto'));
-                $persona->setCognom1(mb_convert_encoding($cols[1], 'UTF-8', 'auto'));
-                $persona->setCognom2(mb_convert_encoding($cols[2], 'UTF-8', 'auto'));
-                $persona->setCarrer(mb_convert_encoding($cols[3], 'UTF-8', 'auto'));
+                $persona->setNom(mb_convert_encoding($cols[0], 'UTF-8', 'ANSI_X3.4-1968'));
+                $persona->setCognom1(mb_convert_encoding($cols[1], 'UTF-8', 'ANSI_X3.4-1968'));
+                $persona->setCognom2(mb_convert_encoding($cols[2], 'UTF-8', 'ANSI_X3.4-1968'));
+                $persona->setCarrer(mb_convert_encoding($cols[3], 'UTF-8', 'ANSI_X3.4-1968'));
                 $persona->setCP($cols[4]);
                 $persona->setCiutat($cols[5]);
                 $persona->setProvincia($cols[6]);
