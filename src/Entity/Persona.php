@@ -28,7 +28,7 @@ class Persona extends PersonaEmpresa
     {
         return [
             'TaxIdentification' => [
-                'PersonTypeCode' => $this->isPersonaJuridica() ? 'J' : 'F',
+                'PersonTypeCode' => 'F',
                 'ResidenceTypeCode' => 'R',
                 'TaxIdentificationNumber' => $this->getNIF(),
             ],
