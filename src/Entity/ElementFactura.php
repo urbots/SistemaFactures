@@ -141,8 +141,8 @@ class ElementFactura
             'ItemDescription' => $this->elements->getConcepte(),
             'Quantity' => $this->Unitats,
             'UnitPriceWithoutTax' => $this->preuSenseImpostos,
-            'TotalCost' => $this->preuAmbImpostos*$this->Unitats,
-            'GrossAmount' => $this->preuAmbImpostos*$this->Unitats,
+            'TotalCost' => $this->preuSenseImpostos*$this->Unitats,
+            'GrossAmount' => $this->preuSenseImpostos*$this->Unitats,
             'TaxesOutputs' => [
                 'Tax' => [
                     'TaxTypeCode' => $this->Impost->getType(),
